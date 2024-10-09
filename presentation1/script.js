@@ -1,153 +1,74 @@
-// // // Initialize posts array  
-// // let posts = JSON.parse(localStorage.getItem('posts')) || [];  
+document.addEventListener('DOMContentLoaded', loadPosts);  
 
-// // // DOM Elements  
-// // const newPostBtn = document.getElementById('newPostBtn');  
-// // const postForm = document.getElementById('postForm');  
-// // const postTitle = document.getElementById('postTitle');  
-// // const postContent = document.getElementById('postContent');  
-// // const submitPostBtn = document.getElementById('submitPostBtn');  
-// // const cancelPostBtn = document.getElementById('cancelPostBtn');  
-// // const postsContainer = document.getElementById('posts');  
+document.getElementById('postForm').addEventListener('submit', function (event) {  
+    event.preventDefault(); // Prevent the default form submission  
 
-// // // Functions  
-// // function displayPosts() {  
-// //     postsContainer.innerHTML = '';  
-// //     posts.forEach((post, index) => {  
-// //         const postDiv = document.createElement('div');  
-// //         postDiv.classList.add('post');  
+    const title = document.getElementById('title').value;  
+    const content = document.getElementById('content').value;  
+    const imageFile = document.getElementById('image').files[0];  
+    const videoFile = document.getElementById('video').files[0];  
 
-// //         postDiv.innerHTML = `  
-// //             <h3>${post.title}</h3>  
-// //             <p>${post.content}</p>  
-// //             <button class="edit-btn" onclick="editPost(${index})">Edit</button>  
-// //             <button class="delete-btn" onclick="deletePost(${index})">Delete</button>  
-// //         `;  
-// //         postsContainer.appendChild(postDiv);  
-// //     });  
-// // }  
+    const post = {  
+        title: title,  
+        content: content,  
+        image: imageFile ? URL.createObjectURL(imageFile) : null,  
+        video: videoFile ? URL.createObjectURL(videoFile) : null,  
+    };  
 
-// // function addPost() {  
-// //     const title = postTitle.value;  
-// //     const content = postContent.value;  
+    addPost(post);  
+    renderPost(post);  
 
-// //     if (title && content) {  
-// //         posts.push({ title, content });  
-// //         localStorage.setItem('posts', JSON.stringify(posts));  
-// //         postTitle.value = '';  
-// //         postContent.value = '';  
-// //         postForm.classList.add('hidden');  
-// //         displayPosts();  
-// //     }  
-// // }  
+    // Clear the input fields  
+    document.getElementById('postForm').reset();  
+});  
 
-// // function editPost(index) {  
-// //     postTitle.value = posts[index].title;  
-// //     postContent.value = posts[index].content;  
-// //     postForm.classList.remove('hidden');  
+function loadPosts() {  
+    const posts = JSON.parse(localStorage.getItem('posts')) || [];  
+    posts.forEach(post => renderPost(post));  
+}  
 
-// //     submitPostBtn.onclick = function() {  
-// //         posts[index] = { title: postTitle.value, content: postContent.value };  
-// //         localStorage.setItem('posts', JSON.stringify(posts));  
-// //         postTitle.value = '';  
-// //         postContent.value = '';  
-// //         postForm.classList.add('hidden');  
-// //         displayPosts();  
-// //     }  
-// // }  
+function addPost(post) {  
+    const posts = JSON.parse(localStorage.getItem('posts')) || [];  
+    posts.push(post);  
+    localStorage.setItem('posts', JSON.stringify(posts));  
+}  
 
-// // function deletePost(index) {  
-// //     posts.splice(index, 1);  
-// //     localStorage.setItem('posts', JSON.stringify(posts));  
-// //     displayPosts();  
-// // }  
+function renderPost(post) {  
+    const postsDiv = document.getElementById('posts');  
 
-// // // Event Listeners  
-// // newPostBtn.onclick = function() {  
-// //     postForm.classList.remove('hidden');  
-// // };  
+    const postDiv = document.createElement('div');  
+    postDiv.className = 'post';  
 
-// // cancelPostBtn.onclick = function() {  
-// //     postTitle.value = '';  
-// //     postContent.value = '';  
-// //     postForm.classList.add('hidden');  
-// // };  
+    postDiv.innerHTML = `  
+        <h2>${post.title}</h2>  
+        <p>${post.content}</p>  
+        ${post.image ? `<img src="${post.image}" alt="Post Image" class="post-image">` : ''}  
+        ${post.video ? `<video controls class="post-video"><source src="${post.video}" type="video/mp4">Your browser does not support the video tag.</video>` : ''}  
+        <button class="edit-button" onclick='editPost("${post.title}")'>Edit</button>  
+        <button class="delete-button" onclick='deletePost("${post.title}")'>Delete</button>  
+    `;  
 
-// // // Submit post event  
-// // submitPostBtn.onclick = addPost;  
+    postsDiv.appendChild(postDiv);  
+}  
 
-// // // Display posts on load  
-// // displayPosts();
-// // Initialize posts from local storage or set an empty array  
-// let posts = JSON.parse(localStorage.getItem('posts')) || [];  
+function deletePost(title) {  
+    const posts = JSON.parse(localStorage.getItem('posts')) || [];  
+    const updatedPosts = posts.filter(post => post.title !== title);  
+    localStorage.setItem('posts', JSON.stringify(updatedPosts));  
+    location.reload(); // Reload the page to reflect changes  
+}  
 
-// // DOM Elements  
-// const newPostBtn = document.getElementById('newPostBtn');  
-// const postForm = document.getElementById('postForm');  
-// const postTitle = document.getElementById('postTitle');  
-// const postContent = document.getElementById('postContent');  
-// const submitPostBtn = document.getElementById('submitPostBtn');  
-// const cancelPostBtn = document.getElementById('cancelPostBtn');  
-// const postsContainer = document.getElementById('posts');  
+function editPost(title) {  
+    const posts = JSON.parse(localStorage.getItem('posts')) || [];  
+    const postToEdit = posts.find(post => post.title === title);  
 
-// // Display all posts  
-// function displayPosts() {  
-//     postsContainer.innerHTML = posts.map((post, index) => `  
-//         <div class="post">  
-//             <h3>${post.title}</h3>  
-//             <p>${post.content}</p>  
-//             <button class="edit-btn" onclick="editPost(${index})">Edit</button>  
-//             <button class="delete-btn" onclick="deletePost(${index})">Delete</button>  
-//         </div>  
-//     `).join('');  
-// }  
-
-// // Add or update a post  
-// function savePost(isEditing = false, index = null) {  
-//     const title = postTitle.value.trim();  
-//     const content = postContent.value.trim();  
-    
-//     if (title && content) {  
-//         if (isEditing && index !== null) {  
-//             posts[index] = { title, content }; // Update existing post  
-//         } else {  
-//             posts.push({ title, content }); // Add new post  
-//         }  
-//         localStorage.setItem('posts', JSON.stringify(posts));  
-//         clearForm();  
-//         displayPosts();  
-//     }  
-// }  
-
-// // Clear the post form  
-// function clearForm() {  
-//     postTitle.value = '';  
-//     postContent.value = '';  
-//     postForm.classList.add('hidden');  
-// }  
-
-// // Edit a post  
-// function editPost(index) {  
-//     postTitle.value = posts[index].title;  
-//     postContent.value = posts[index].content;  
-//     postForm.classList.remove('hidden');  
-//     submitPostBtn.onclick = () => savePost(true, index); // Set to edit mode  
-// }  
-
-// // Delete a post  
-// function deletePost(index) {  
-//     posts.splice(index, 1);  
-//     localStorage.setItem('posts', JSON.stringify(posts));  
-//     displayPosts();  
-// }  
-
-// // Event Listeners  
-// newPostBtn.onclick = () => {  
-//     postForm.classList.remove('hidden');  
-//     clearForm();  
-// };  
-// cancelPostBtn.onclick = clearForm;  
-// submitPostBtn.onclick = () => savePost(); // Set to add mode  
-
-// // Initial display of posts  
-// displayPosts();
+    if (postToEdit) {  
+        document.getElementById('title').value = postToEdit.title;  
+        document.getElementById('content').value = postToEdit.content;  
+        document.getElementById('image').value = ''; // Clear file input  
+        document.getElementById('video').value = ''; // Clear file input  
+        
+        // Remove the post from local storage before editing  
+        deletePost(title);  
+    }  
+}
